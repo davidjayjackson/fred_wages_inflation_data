@@ -1,0 +1,53 @@
+---
+title: "FRED Analysis"
+author: "DJJ"
+date: "2023-07-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(fable)
+library(scales)
+library(janitor)
+library(plotly)
+```
+
+## R Markdown
+
+```{r}
+# Three and Twelve Month Wages
+rm(list=ls())
+wages <- read_csv("./fred_median_wages.csv")
+wages <- wages %>%
+  filter(!is.na(FRBATLWGT3MMAUMHWGO), FRBATLWGT12MMUMHGO != "", FRBATLWGT12MMUMHGO %>% str_detect("[0-9]"))|> clean_names()
+colnames(wages) <- c("date","three_median_wages","twelve_median_wages")
+wages$twelve_median_wages <- as.numeric(wages$twelve_median_wages)
+```
+```{r}
+summary(wages)
+```
+
+```{r}
+# uigfull = Full Inflation quage
+inflation <- read_csv("./fred_inflation.csv")
+inflation <- inflation %>%
+  filter(!is.na(UIGFULL), UIGFULL != "", UIGFULL %>% str_detect("[0-9]")) |> clean_names()|> select(date,uigfull)
+inflation$uigfull <- as.numeric(inflation$uigfull)
+  
+
+```
+```{r}
+summary(inflation)
+```
+
+
+## Join wages and inflation
+
+```{r}
+wage_inflation <- inflation |> left_join(wages)
+summary(wage_inflation)
+```
+
+
