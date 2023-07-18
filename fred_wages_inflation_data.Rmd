@@ -46,8 +46,57 @@ summary(inflation)
 ## Join wages and inflation
 
 ```{r}
-wage_inflation <- inflation |> left_join(wages)
+wage_inflation <- inflation |> inner_join(wages)
 summary(wage_inflation)
+```
+```{r}
+writexl::write_xlsx(wage_inflation,path="./fred_wage_inflation.xlsx")
+```
+
+## Plot Inflation Data
+
+
+```{r}
+plot01 <-ggplot(wage_inflation) +
+  geom_line(aes(x = date, y = uigfull), color = "steelblue", size = 1.2) +
+  geom_smooth(aes(x = date, y = uigfull), color = "orange", size = 1, se = FALSE) +
+  labs(title = "US Inflation Data Over Time",
+       x = "Year",
+       y = "Inflation Percent (%)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+        legend.position = "none")
+ggplotly(plot01)
+```
+
+```{r}
+plot02 <-ggplot(wage_inflation) +
+  geom_line(aes(x = date, y = three_median_wages), color = "steelblue", size = 1.2) +
+  geom_smooth(aes(x = date, y = three_median_wages), color = "orange", size = 1, se = FALSE) +
+  labs(title = "US Median Wages Over Time",
+       x = "Year",
+       y = "3 Month Median Wages") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+        legend.position = "none")
+ggplotly(plot02)
+```
+```{r}
+wage_inflation$wage2inflation <- wage_inflation$three_median_wages/wage_inflation$uigfull
+```
+```{r}
+ggplot(wage_inflation) + geom_line(aes(x=date,y=wage2inflation))
+```
+```{r}
+wage_inflation$inflation2wage <- wage_inflation$uigfull/wage_inflation$three_median_wages
+```
+```{r}
+ggplot(wage_inflation) + geom_line(aes(x=date,y=inflation2wage,col="inflation2wage")) 
+
 ```
 
 
